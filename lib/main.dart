@@ -1,11 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'constants.dart';
 import 'location.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+const double _movedZoom = 5.0;
 
 void main() => runApp(MyApp());
 
@@ -16,15 +19,6 @@ class MyApp extends StatelessWidget {
     return CupertinoApp(
       title: 'Geo Locations',
       theme: CupertinoThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
           textTheme: CupertinoTextThemeData()),
       home: MyHomePage(title: 'Terminals Map Page'),
     );
@@ -34,15 +28,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -50,29 +35,127 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Completer<GoogleMapController> _controller = Completer();
   GoogleMapController _mapController;
 
   final Set<Marker> _markers = {};
 
-  static const LatLng _center = const LatLng(37.922607, 58.384225);
-
-  LatLng _lastMapPosition = _center;
+  static LatLng _center = const LatLng(37.922607, 58.384225);
 
   MapType _currentMapType = MapType.normal;
 
   List<Terminal> terminalList = List<Terminal>();
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
 
-  static final CameraPosition _kLake = CameraPosition(
-      bearing: 192.8334901395799,
-      target: LatLng(37.43296265331129, -122.08832357078792),
-      tilt: 59.440717697143555,
-      zoom: 19.151926040649414);
+  _tryActionSheet(BuildContext context) async {
+    await showCupertinoModalPopup(
+      context:  context,
+      builder: (context){
+        return CupertinoActionSheet(
+          title: Text("Welaýatlar"),
+          message: Text("Kartany haýsy welaýata süýşirmek isleseňiz, şol welaýaty saýlaň"),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                _center = LatLng(38.839561, 58.860998);
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: _center,
+                            zoom: _movedZoom
+                        )
+                    )
+                );
+              } ,
+              child: Text("Ahal"),
+            ),
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                _center = LatLng(37.622607, 58.984225);
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: _center,
+                            zoom: _movedZoom
+                        )
+                    )
+                );
+              } ,
+              child: Text("Aşgabat"),
+            ),
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                setState(() => _center = LatLng(39.935362, 54.912013));
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                          target: _center,
+                          zoom: _movedZoom
+                        )
+                    )
+                );
+                print("balkan");
+              } ,
+              child: Text("Balkan"),
+            ),
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                _center = LatLng(41.386199, 58.558616);
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: _center,
+                            zoom: _movedZoom
+                        )
+                    )
+                );
+              } ,
+              child: Text("Daşoguz"),
+            ),
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                _center = LatLng(38.813115, 63.051339);
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: _center,
+                            zoom: _movedZoom
+                        )
+                    )
+                );
+              } ,
+              child: Text("Lebap"),
+            ),
+            CupertinoActionSheetAction(
+              onPressed:(){
+                Navigator.of(context, rootNavigator: true).pop();
+                _center = LatLng(37.604699, 61.846276);
+                _mapController.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: _center,
+                            zoom: _movedZoom
+                        )
+                    )
+                );
+              } ,
+              child: Text("Mary"),
+            ),
+          ],
+          cancelButton:CupertinoActionSheetAction(
+            onPressed:(){
+              Navigator.of(context, rootNavigator: true).pop();
+            } ,
+            child: Text("Bes Et"),
+          ),
+        );
+      },
+    );
+  }
 
   //Method to get user data from server
   Future<List<Terminal>> _fetchTerminals(BuildContext context) async {
@@ -85,9 +168,27 @@ class _MyHomePageState extends State<MyHomePage> {
       // If server returns an OK response, parse the JSON.
       var terminals = json.decode(response.body) as List;
 
-      print("User response: " + terminalList.length.toString());
+      print("Terminal response: " + response.statusCode.toString());
 
-      return terminals.map((i) => Terminal.fromJson(i)).toList();
+      setState(() {
+        terminalList = terminals.map((i) => Terminal.fromJson(i)).toList();
+
+          terminalList.forEach((terminal) {
+            _markers.add(Marker(
+              // This marker id can be anything that uniquely identifies each marker.
+              markerId: MarkerId(terminal.terminalId),
+              position: LatLng(terminal.altitude, terminal.longitude),
+              infoWindow: InfoWindow(
+                  title: terminal.owner,
+                  snippet: terminal.address + " (" + terminal.statusText + ")"
+              ),
+              icon: terminal.status ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen): BitmapDescriptor.defaultMarker,
+            ));
+          });
+
+      });
+
+      return terminalList;
 
     } else {
       // If that response was not OK, throw an error.
@@ -99,55 +200,61 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    _fetchTerminals(context);
+    _center = const LatLng(37.922607, 58.384225);
 
     super.initState();
   }
 
-  void _onMapCreated(GoogleMapController controller) async {
-    terminalList = await _fetchTerminals(context);
-    setState(() {
-      //_mapController = controller;
-      terminalList.forEach((terminal) {
-        _markers.add(Marker(
-          // This marker id can be anything that uniquely identifies each marker.
-          markerId: MarkerId(terminal.terminalId),
-          position: LatLng(terminal.altitude, terminal.longitude),
-          infoWindow: InfoWindow(
-            title: terminal.owner,
-            snippet: terminal.address,
-          ),
-          icon: BitmapDescriptor.defaultMarker,
-        ));
-      });
-    });
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
   }
 
   void _onCameraMove(CameraPosition position) {
-    _lastMapPosition = position.target;
+    //_center = position.target;
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text("Terminals"),
       ),
-      child: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _center,
-          zoom: 11.0,
-        ),
-        mapType: _currentMapType,
-        markers: _markers,
-        onCameraMove: _onCameraMove,
-      ),
+      child: Stack(
+        children: <Widget>[
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _center,
+              zoom: 11.0,
+            ),
+            myLocationButtonEnabled: true,
+            myLocationEnabled: true,
+            mapType: _currentMapType,
+            markers: _markers,
+            onCameraMove: _onCameraMove,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Column(
+                children: <Widget> [
+                  SizedBox(height: 100.0),
+                  FloatingActionButton(
+                    onPressed: () {
+                      _tryActionSheet(context);
+                    },
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    backgroundColor: Colors.green,
+                    child: const Icon(Icons.gps_not_fixed, size: 32.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
