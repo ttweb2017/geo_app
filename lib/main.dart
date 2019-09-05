@@ -84,40 +84,34 @@ class _MyHomePageState extends State<MyHomePage> {
     if (response.statusCode == 200) {
       // If server returns an OK response, parse the JSON.
       var terminals = json.decode(response.body) as List;
-      terminalList = terminals.map((i) => Terminal.fromJson(i)).toList();
 
       print("User response: " + terminalList.length.toString());
+
+      return terminals.map((i) => Terminal.fromJson(i)).toList();
 
     } else {
       // If that response was not OK, throw an error.
       print("Terminals response code: " + response.statusCode.toString());
     }
 
-    print("Terminal address: " + terminalList.elementAt(0).address);
-
-    return terminalList;
+    return null;
   }
 
   @override
   void initState() {
-    _fetchTerminals(context);
 
     super.initState();
   }
 
-  void _onMapCreated(GoogleMapController controller) {
+  void _onMapCreated(GoogleMapController controller) async {
+    terminalList = await _fetchTerminals(context);
     setState(() {
       //_mapController = controller;
       terminalList.forEach((terminal) {
-        /*_mapController.addMarker(MarkerOptions(
-            zIndex: terminal.id.toDouble(),
-            position: LatLng(terminal.altitude, terminal.longitude),
-            infoWindowText:
-            InfoWindowText(terminal.owner, terminal.address)));*/
         _markers.add(Marker(
           // This marker id can be anything that uniquely identifies each marker.
-          markerId: MarkerId(_lastMapPosition.toString()),
-          position: _lastMapPosition,
+          markerId: MarkerId(terminal.terminalId),
+          position: LatLng(terminal.altitude, terminal.longitude),
           infoWindow: InfoWindow(
             title: terminal.owner,
             snippet: terminal.address,
@@ -125,21 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: BitmapDescriptor.defaultMarker,
         ));
       });
-
-      /*_mapController.onInfoWindowTapped.add((Marker marker) {
-        var index = marker.options.zIndex.toInt() - 1;*/
-        /*Navigator.of(context).push(MaterialPageRoute(
-            builder: (BuildContext context) => VenueDetails(locations[index])));*/
-      });
-      /*_mapController.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-          bearing: 270.0,
-          target: LatLng(
-              terminalList.elementAt(0).altitude, terminalList.elementAt(0).longitude),
-          tilt: 30.0,
-          zoom: 17.0,
-        ),
-      ));*/
+    });
   }
 
   void _onCameraMove(CameraPosition position) {
@@ -170,26 +150,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  /*@override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("Terminals"),
-      ),
-      child: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
-    );
-  }*/
 }
