@@ -72,12 +72,12 @@ class _MyHomePageState extends State<MyHomePage> {
             CupertinoActionSheetAction(
               onPressed:(){
                 Navigator.of(context, rootNavigator: true).pop();
-                _center = LatLng(37.622607, 58.984225);
+                _center = LatLng(37.922607, 58.384225);
                 _mapController.animateCamera(
                     CameraUpdate.newCameraPosition(
                         CameraPosition(
                             target: _center,
-                            zoom: _movedZoom
+                            zoom: 11.0
                         )
                     )
                 );
