@@ -45,6 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Terminal> terminalList = List<Terminal>();
 
+  bool _isLoaded = false;
+
 
   _tryActionSheet(BuildContext context) async {
     await showCupertinoModalPopup(
@@ -173,19 +175,20 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         terminalList = terminals.map((i) => Terminal.fromJson(i)).toList();
 
-          terminalList.forEach((terminal) {
-            _markers.add(Marker(
-              // This marker id can be anything that uniquely identifies each marker.
-              markerId: MarkerId(terminal.terminalId),
-              position: LatLng(terminal.altitude, terminal.longitude),
-              infoWindow: InfoWindow(
+        terminalList.forEach((terminal) {
+          _markers.add(Marker(
+            // This marker id can be anything that uniquely identifies each marker.
+            markerId: MarkerId(terminal.terminalId),
+            position: LatLng(terminal.altitude, terminal.longitude),
+            infoWindow: InfoWindow(
                   title: terminal.owner,
                   snippet: terminal.address + " (" + terminal.statusText + ")"
-              ),
-              icon: terminal.status ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen): BitmapDescriptor.defaultMarker,
-            ));
-          });
+            ),
+            icon: terminal.status ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen): BitmapDescriptor.defaultMarker,
+          ));
+        });
 
+        _isLoaded = true;
       });
 
       return terminalList;
@@ -200,10 +203,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    super.initState();
+
     _fetchTerminals(context);
     _center = const LatLng(37.922607, 58.384225);
-
-    super.initState();
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -233,6 +236,11 @@ class _MyHomePageState extends State<MyHomePage> {
             mapType: _currentMapType,
             markers: _markers,
             onCameraMove: _onCameraMove,
+          ),
+          _isLoaded ?
+          Container() :
+          Center(
+            child: const CupertinoActivityIndicator(radius: 20.0)
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
