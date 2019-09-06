@@ -10,31 +10,31 @@ import 'package:http/http.dart' as http;
 
 const double _movedZoom = 5.0;
 
-void main() => runApp(MyApp());
+void main() => runApp(TerminalApp());
 
-class MyApp extends StatelessWidget {
+class TerminalApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      title: 'Geo Locations',
+      title: 'Terminal Gözle',
       theme: CupertinoThemeData(
           textTheme: CupertinoTextThemeData()),
-      home: MyHomePage(title: 'Terminals Map Page'),
+      home: TerminalMapPage(title: 'Terminallar'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class TerminalMapPage extends StatefulWidget {
+  TerminalMapPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _TerminalMapPageState createState() => _TerminalMapPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _TerminalMapPageState extends State<TerminalMapPage> {
   GoogleMapController _mapController;
 
   final Set<Marker> _markers = {};
@@ -221,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text("Terminals"),
+        middle: Text(widget.title),
       ),
       child: Stack(
         children: <Widget>[
