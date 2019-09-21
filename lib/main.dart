@@ -162,40 +162,47 @@ class _TerminalMapPageState extends State<TerminalMapPage> {
   //Method to get user data from server
   Future<List<Terminal>> _fetchTerminals(BuildContext context) async {
 
-    final response = await http.get(
-        Constants.TERMINAL_URL
-    );
+    try{
+      final response = await http.get(
+          Constants.TERMINAL_URL
+      );
 
-    if (response.statusCode == 200) {
-      // If server returns an OK response, parse the JSON.
-      var terminals = json.decode(response.body) as List;
+      if (response.statusCode == 200) {
+        // If server returns an OK response, parse the JSON.
+        var terminals = json.decode(response.body) as List;
 
-      print("Terminal response: " + response.statusCode.toString());
+        print("Terminal response: " + response.statusCode.toString());
 
-      setState(() {
-        terminalList = terminals.map((i) => Terminal.fromJson(i)).toList();
+        setState(() {
+          terminalList = terminals.map((i) => Terminal.fromJson(i)).toList();
 
-        terminalList.forEach((terminal) {
-          _markers.add(Marker(
-            // This marker id can be anything that uniquely identifies each marker.
-            markerId: MarkerId(terminal.terminalId),
-            position: LatLng(terminal.altitude, terminal.longitude),
-            infoWindow: InfoWindow(
+          terminalList.forEach((terminal) {
+            _markers.add(Marker(
+              // This marker id can be anything that uniquely identifies each marker.
+              markerId: MarkerId(terminal.terminalId),
+              position: LatLng(terminal.altitude, terminal.longitude),
+              infoWindow: InfoWindow(
                   title: terminal.owner,
                   snippet: terminal.address + " (" + terminal.statusText + ")"
-            ),
-            icon: terminal.status ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen): BitmapDescriptor.defaultMarker,
-          ));
+              ),
+              icon: terminal.status ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen): BitmapDescriptor.defaultMarker,
+            ));
+          });
+
+          _isLoaded = true;
         });
 
-        _isLoaded = true;
-      });
+        return terminalList;
 
-      return terminalList;
-
-    } else {
-      // If that response was not OK, throw an error.
-      print("Terminals response code: " + response.statusCode.toString());
+      } else {
+        // If that response was not OK, throw an error.
+        print("Terminals response code: " + response.statusCode.toString());
+        setState(() {
+          _isLoaded = true;
+        });
+      }
+    }catch(e){
+      print("Could not connect to api. Check internet connectivity!");
 
       setState(() {
         _isLoaded = true;
