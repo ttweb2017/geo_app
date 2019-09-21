@@ -196,6 +196,10 @@ class _TerminalMapPageState extends State<TerminalMapPage> {
     } else {
       // If that response was not OK, throw an error.
       print("Terminals response code: " + response.statusCode.toString());
+
+      setState(() {
+        _isLoaded = true;
+      });
     }
 
     return null;
